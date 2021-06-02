@@ -1,5 +1,6 @@
 import os
 import json
+from pathlib import Path
 from .nfo import get_config
 
 class Ytdl_nfo:
@@ -15,13 +16,19 @@ class Ytdl_nfo:
         if extractor is None:
             self.extractor = self.data['extractor'].lower()
 
-        self.filename = os.path.splitext(self.data['_filename'])[0]
+        try:
+            self.filename = os.path.splitext(self.data['_filename'])[0]
+        except KeyError:
+            self.filename = Path(self.path)
         self.nfo = get_config(self.extractor)
 
     def process(self):
         self.nfo.generate(self.data)
         #self.nfo.print_nfo()
-        self.nfo.write_nfo(os.path.join(self.dir, f'{self.filename}.nfo'))
+        if self.filename.name[-len('.info.json'):] == '.info.json':
+            self.nfo.write_nfo(os.path.join(self.dir, Path(self.filename.parent).joinpath(self.filename.name.replace('.info.json', '.nfo'))))
+        else:
+            self.nfo.write_nfo(os.path.join(self.dir, self.filename.with_suffix('.nfo')))
 
     def print_data(self):
         print(json.dumps(self.data, indent=4, sort_keys=True))

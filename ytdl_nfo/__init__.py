@@ -1,5 +1,6 @@
 import argparse
 import os
+from pathlib import Path
 from .Ytdl_nfo import Ytdl_nfo
 
 def main():
@@ -11,6 +12,9 @@ def main():
     args = parser.parse_args()
 
     if os.path.isfile(args.input):
+        filename = Path(args.input)
+        if filename.suffix != '.json':
+            args.input = filename.with_suffix('.info.json')
         print(f'Processing {args.input} with extractor {args.extractor}')
         file = Ytdl_nfo(args.input, args.extractor)
         file.process()
